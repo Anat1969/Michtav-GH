@@ -364,3 +364,7 @@ mark, .mk { background: linear-gradient(transparent 45%, var(--marker) 45%); col
 .sun-t { color: #ffe2a8; }
 .locked-sea { height: min(60vh, 460px); overflow: hidden; box-shadow: var(--lift-hi); background: #0b1630; }
 @media (max-width: 720px) { .letters-sea { height: 220px; } .open-sea { height: 200px; } .locked-sea { height: 300px; } }
+.sound { position: absolute; z-index: 2; }
+.hero-sound { top: 16px; inset-inline-end: 16px; }
+.sea-sound { bottom: 10px; inset-inline-end: 10px; }
+.btn.glass[aria-pressed="true"] { background: rgba(255,226,168,.9); color: #1d2433; }

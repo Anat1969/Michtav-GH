@@ -4,6 +4,7 @@ import { useLetters, getSample } from '../logic/store'
 import { compare } from '../logic/score'
 import { nextFirst, daysUntil, fmt, isDue } from '../logic/dates'
 import { go } from '../logic/route'
+import { SoundToggle } from '../components/SoundToggle'
 
 /** כמה מהחודש כבר עבר: הזמן שהשמיים מראים. */
 export function monthProgress(now = new Date()) {
@@ -51,6 +52,7 @@ export function Home() {
             {due > 0 && <a className="btn wax" href="#/letters">{due} בקבוקים על החוף</a>}
           </div>
         </motion.div>
+        <SoundToggle className="hero-sound" />
         <div className="hero-legend" aria-label="מקרא">
           <span><i className="lg-light" /> מגדלור: חזון</span>
           <span><i className="lg-cloud" /> ענן: פחד</span>

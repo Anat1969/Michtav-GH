@@ -56,6 +56,11 @@ async function scrollRatio(page) { return page.evaluate(() => document.documentE
     ok(px.sea[3] === 255 && px.sea[2] > px.sea[0], `sea is painted blue (${px.sea.slice(0, 3)})`)
     ok(px.sky[3] === 255, 'sky is painted')
     ok((await page.locator('.hero-legend').textContent()).includes('מגדלור'), 'scene has a legend')
+    await page.click('[data-testid=sound]')
+    ok((await page.getAttribute('[data-testid=sound]', 'aria-pressed')) === 'true', 'sound toggles on')
+    ok((await page.evaluate(() => localStorage.getItem('michtav.sound'))) === '1', 'sound preference saved')
+    await page.click('[data-testid=sound]')
+    ok((await page.getAttribute('[data-testid=sound]', 'aria-pressed')) === 'false', 'sound toggles off')
   }
   ok(await page.locator('.cmap-card').count() === 4, 'content map has 4 cards')
   ok(await scrollRatio(page) < 1.4, `home fits the screen (ratio ${(await scrollRatio(page)).toFixed(2)})`)

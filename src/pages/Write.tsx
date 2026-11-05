@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { LetterPaper, type Draft } from '../components/LetterPaper'
 import { Seascape } from '../components/Seascape'
+import { SoundToggle } from '../components/SoundToggle'
+import { splash } from '../logic/sound'
 import { Rich } from '../components/Rich'
 import { AREAS, type Item, type Letter } from '../logic/types'
 import { nextFirst, fmt, uid } from '../logic/dates'
@@ -83,6 +85,7 @@ export function Write() {
     try {
       await saveLetter(letter)
       setSealed(letter)
+      setTimeout(splash, 1600)
       try { localStorage.removeItem(DRAFT_KEY) } catch { /* */ }
     } catch {
       setMsg('השמירה בשרת נכשלה. אפשר לחתום במכשיר.')
@@ -179,6 +182,7 @@ export function Write() {
               fears={d.fears.filter((x) => x.text.trim()).map((x) => ({ p: x.p }))}
               bottles={sealed ? undefined : []}
               label="הים של המכתב: מגדלור לכל חזון, ענן לכל פחד" />
+            <SoundToggle className="sea-sound" />
             {!sealed && <span className="write-sea-cap"><b className="num">{d.visions.filter((x) => x.text.trim()).length}</b> מגדלורים · <b className="num">{d.fears.filter((x) => x.text.trim()).length}</b> עננים</span>}
           </div>
           <LetterPaper d={d} step={step} sealed={!!sealed} />
