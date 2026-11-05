@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { LetterPaper, type Draft } from '../components/LetterPaper'
+import { Seascape } from '../components/Seascape'
 import { Rich } from '../components/Rich'
 import { AREAS, type Item, type Letter } from '../logic/types'
 import { nextFirst, fmt, uid } from '../logic/dates'
@@ -19,10 +20,10 @@ function initial(): Draft {
 }
 
 const STEPS = [
-  { short: 'חזון', q: 'מה יהיה נכון בחיים שלך בראשון לחודש הבא?', hint: 'כתבו כאילו זה כבר קרה, בגוף ראשון. ולכל משפט: כמה סביר שיתממש?' },
-  { short: 'פחד', q: 'ממה יש לך חשש לחודש הקרוב?', hint: 'הדאגה הכי אמיתית, לא הכי נכונה. ולכל אחת: כמה סביר שתתממש?' },
-  { short: 'היום', q: 'איפה הסולם שלך עומד היום?', hint: 'דמיינו סולם: 10 הם החיים הטובים ביותר האפשריים עבורך, ו-0 הגרועים ביותר.' },
-  { short: 'חתימה', q: 'מה להגיד לעצמך בראשון לחודש?', hint: 'משפט אחד או פסקה. המכתב ייפתח ב-' },
+  { short: 'חזון', q: 'מה יהיה נכון בחיים שלך בראשון לחודש הבא?', hint: 'כל משפט מדליק מגדלור. ככל שהוא סביר יותר, האור חזק יותר.' },
+  { short: 'פחד', q: 'ממה יש לך חשש לחודש הקרוב?', hint: 'כל פחד הוא ענן. ככל שהוא סביר יותר, הענן כהה יותר.' },
+  { short: 'היום', q: 'איפה הסולם שלך עומד היום?', hint: '10 הם החיים הטובים ביותר האפשריים עבורך. 0 הגרועים ביותר.' },
+  { short: 'חתימה', q: 'מה להגיד לעצמך בראשון לחודש?', hint: 'הבקבוק יגיע לחוף ב-' },
 ]
 
 function ItemsEditor({ items, onChange, kind, placeholder }: { items: Item[]; onChange: (x: Item[]) => void; kind: 'sprout' | 'wax'; placeholder: string[] }) {
@@ -97,17 +98,17 @@ export function Write() {
         <section className="write-form" aria-live="polite">
           {sealed ? (
             <div className="sealed-done">
-              <p className="eyebrow">המכתב חתום</p>
-              <h1 className="h2">נפתח ב-<mark className="num">{fmt(sealed.openAt)}</mark>. עד אז הוא שותק.</h1>
-              <Rich insight={`**${sealed.questions.length} שאלות השוואה** מחכות בפנים.`} detail={sealed.storage === 'cloud' ? 'החותם בשרת: **אף אחד** לא יכול לקרוא את התוכן לפני יום הפתיחה, גם לא את/ה.' : 'החותם במכשיר הזה. כדאי להוסיף **תזכורת ליומן** ולשמור **גיבוי** מדף המכתבים.'} />
+              <p className="eyebrow">הבקבוק בים</p>
+              <h1 className="h2">יגיע לחוף ב-<mark className="num">{fmt(sealed.openAt)}</mark>.</h1>
+              <Rich insight={`**${sealed.questions.length} שאלות השוואה** מחכות בפנים.`} detail={sealed.storage === 'cloud' ? 'בשרת. **אף אחד** לא קורא אותו לפני הראשון, גם לא את/ה.' : 'במכשיר הזה. **תזכורת ליומן** תזכיר בכל ראשון לחודש.'} />
               <div className="home-cta">
                 <button className="btn primary" onClick={reminder}>תזכורת ליומן</button>
                 <a className="btn" href="#/letters">למכתבים שלי</a>
               </div>
               <ol className="tl" aria-label="מה קורה עכשיו">
-                <li className="now"><span className="label">היום, {fmt(sealed.createdAt)}</span><b>המכתב חתום</b><span className="note">{sealed.visions.length} חזון, {sealed.fears.length} פחד, סולם {sealed.ladder}.</span></li>
-                <li><span className="label">במהלך החודש</span><b>שתיקה</b><span className="note">אין קריאה, אין עריכה. הזיכרון עובד לבד.</span></li>
-                <li className="end"><span className="label">{fmt(sealed.openAt)}</span><b>החותם נשבר</b><span className="note">מסמנים מה קרה, ומקבלים ציון ברייר.</span></li>
+                <li className="now"><span className="label">היום, {fmt(sealed.createdAt)}</span><b>הבקבוק נזרק</b><span className="note">{sealed.visions.length} חזון, {sealed.fears.length} פחד, סולם {sealed.ladder}.</span></li>
+                <li><span className="label">במהלך החודש</span><b>נסחף</b><span className="note">בלי קריאה ובלי עריכה.</span></li>
+                <li className="end"><span className="label">{fmt(sealed.openAt)}</span><b>נפלט לחוף</b><span className="note">עננים מתפזרים, מגדלורים נדלקים.</span></li>
               </ol>
             </div>
           ) : (
@@ -120,7 +121,6 @@ export function Write() {
               <h1 className="h2 q">{STEPS[step].q}</h1>
               <p className="note">{STEPS[step].hint}{step === 3 && <b className="num">{fmt(d.openAt)}</b>}{step === 3 && '.'}</p>
 
-              {step === 0 && <div className="why"><Rich insight="למה **מספר** ולא רק משאלה?" detail="**הסתברות** הופכת תקווה לתחזית שאפשר לבדוק. בלי מספר, הזיכרון יתקן אותה **בדיעבד**." /></div>}
               {step === 0 && <ItemsEditor kind="sprout" items={d.visions} onChange={(visions) => setD({ ...d, visions })} placeholder={['למשל: עובד/ת בעבודה שאני גאה בה', 'למשל: רץ/ה עשרה קילומטרים', 'למשל: קרוב/ה יותר לאחותי']} />}
               {step === 1 && (
                 <>
@@ -173,6 +173,14 @@ export function Write() {
           )}
         </section>
         <section className="write-paper" aria-label="תצוגת המכתב">
+          <div className="write-sea">
+            <Seascape progress={sealed ? 0.02 : 0} throwKey={sealed ? 1 : undefined}
+              visions={d.visions.filter((x) => x.text.trim()).map((x) => ({ p: x.p }))}
+              fears={d.fears.filter((x) => x.text.trim()).map((x) => ({ p: x.p }))}
+              bottles={sealed ? undefined : []}
+              label="הים של המכתב: מגדלור לכל חזון, ענן לכל פחד" />
+            {!sealed && <span className="write-sea-cap"><b className="num">{d.visions.filter((x) => x.text.trim()).length}</b> מגדלורים · <b className="num">{d.fears.filter((x) => x.text.trim()).length}</b> עננים</span>}
+          </div>
           <LetterPaper d={d} step={step} sealed={!!sealed} />
         </section>
       </div>

@@ -1,31 +1,31 @@
 import { useEffect, useMemo, useState } from 'react'
-import { motion, useReducedMotion } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Rich } from '../components/Rich'
 import { Calibration, FearBench, BrierScale, Slopes } from '../components/Charts'
 import { findLetter, saveAnswers, resetSample, useLetters } from '../logic/store'
 import { AREAS, type Answers, type Letter, type Outcome, type SealedMeta } from '../logic/types'
 import { daysUntil, fmt, isDue } from '../logic/dates'
-import { compare, scored, brierInsight, fearInsight, visionInsight, ladderInsight, OUTCOME_LABEL } from '../logic/score'
+import { compare, scored, brierInsight, fearInsight, visionInsight, ladderInsight, OUTCOME_LABEL, OUTCOME_VALUE } from '../logic/score'
 import { download, icsFor } from '../logic/ics'
 import { aiDistill } from '../logic/ai'
+import { Seascape } from '../components/Seascape'
 
 const isLetter = (x: Letter | SealedMeta): x is Letter => 'visions' in x && Array.isArray((x as Letter).visions)
 
 function Locked({ x }: { x: Letter | SealedMeta }) {
-  const reduce = useReducedMotion()
   const days = daysUntil(x.openAt)
   return (
     <div className="locked">
-      <motion.svg viewBox="0 0 320 200" className="locked-env" style={{ direction: 'ltr' }} aria-hidden="true" initial={reduce ? false : { y: 16, opacity: 0 }} animate={{ y: 0, opacity: 1 }}>
-        <rect x="4" y="4" width="312" height="192" style={{ fill: 'var(--cotton)', stroke: 'var(--ink)' }} strokeWidth="2" />
-        <path d="M4 4 L160 120 L316 4" style={{ fill: 'none', stroke: 'var(--ink)' }} strokeWidth="2" />
-        <circle cx="160" cy="120" r="30" style={{ fill: 'var(--wax)' }} />
-        <circle cx="160" cy="120" r="12" style={{ fill: 'none', stroke: 'var(--cotton)' }} strokeWidth="4" />
-      </motion.svg>
+      <div className="locked-sea">
+        <Seascape progress={Math.max(0, Math.min(1, (Date.now() - new Date(x.createdAt).getTime()) / (new Date(x.openAt).getTime() - new Date(x.createdAt).getTime())))}
+          visions={'visions' in x && Array.isArray(x.visions) ? x.visions.map(() => ({ p: 50 })) : undefined}
+          fears={'fears' in x && Array.isArray(x.fears) ? x.fears.map(() => ({ p: 50 })) : undefined}
+          label={`הבקבוק בים. ${days} ימים עד החוף.`} />
+      </div>
       <div className="locked-text">
         <p className="eyebrow">המכתב חתום</p>
-        <p><span className="big">{days}</span> <span className="lead">ימים עד שהחותם נשבר</span></p>
-        <Rich insight={`נפתח ב-**${fmt(x.openAt)}**.`} detail={x.storage === 'cloud' ? 'השרת לא מחזיר את התוכן לפני יום הפתיחה, **גם לא לך**. זה החותם.' : 'החותם במכשיר הזה. התוכן מחכה, ו**השאלות** איתו.'} />
+        <p><span className="big">{days}</span> <span className="lead">ימים עד שהבקבוק מגיע לחוף</span></p>
+        <Rich insight={`נפתח ב-**${fmt(x.openAt)}**.`} detail={x.storage === 'cloud' ? 'השרת לא מחזיר את התוכן לפני כן, **גם לא לך**.' : 'החותם במכשיר הזה.'} />
         <div className="row">
           <button className="btn primary" onClick={() => download(`michtav-${fmt(x.openAt)}.ics`, icsFor(x.id, x.openAt, location.href), 'text/calendar')}>תזכורת ליומן</button>
           <a className="btn" href="#/open/sample">לראות יום פתיחה לדוגמה</a>
@@ -37,7 +37,7 @@ function Locked({ x }: { x: Letter | SealedMeta }) {
 
 function Read({ l }: { l: Letter }) {
   return (
-    <article className="read lp cotton">
+    <motion.article className="read lp cotton" initial={{ scaleY: 0.04, opacity: 0 }} animate={{ scaleY: 1, opacity: 1 }} transition={{ duration: 0.9, ease: [0.3, 0, 0.2, 1] }} style={{ transformOrigin: 'top center' }}>
       <header className="lp-head"><span className="label">נכתב ב-{fmt(l.createdAt)}</span><span className="label">נפתח ב-{fmt(l.openAt)}</span></header>
       <p className="lp-salute">לעצמי, בראשון לחודש.</p>
       <div className="read-cols">
@@ -46,7 +46,7 @@ function Read({ l }: { l: Letter }) {
       </div>
       <section><h3 className="lp-h"><span className="dot ink" /> איפה עמדתי</h3><p><b className="num lp-ladder-n">{l.ladder}</b> <span className="note">מתוך 10.</span> {AREAS.map((a) => <span key={a.key} className="note"> {a.label} <b className="num">{l.areas[a.key]}</b> </span>)}</p></section>
       {l.note && <section><h3 className="lp-h"><span className="dot lead" /> מילה לעצמי</h3><p className="lp-note">{l.note}</p></section>}
-    </article>
+    </motion.article>
   )
 }
 
@@ -181,6 +181,14 @@ export function Open({ id }: { id: string }) {
             {tabs.map((t, i) => <button key={t.k} role="tab" aria-selected={tab === t.k} className="chip" aria-pressed={tab === t.k} disabled={!t.on} onClick={() => setTab(t.k)}><span className="num">{i + 1}</span> {t.label}</button>)}
           </div>
         </header>
+        <div className="open-sea">
+          <Seascape progress={1} ashore revealKey={tab === 'compare' ? 1 : undefined}
+            visions={l.visions.map((v) => ({ p: v.p, o: tab === 'compare' && l.answers?.outcomes[v.id] ? OUTCOME_VALUE[l.answers.outcomes[v.id]] : null }))}
+            fears={l.fears.map((f) => ({ p: f.p, o: tab === 'compare' && l.answers?.outcomes[f.id] ? OUTCOME_VALUE[l.answers.outcomes[f.id]] : null }))}
+            label={tab === 'compare' ? 'העננים שלא התממשו מתפזרים. המגדלורים של מה שהתממש דולקים.' : 'הבקבוק נפלט לחוף בזריחה'} />
+          {tab === 'compare' && l.answers && (() => { const gone = l.fears.filter((f) => l.answers!.outcomes[f.id] === 'no').length; const lit = l.visions.filter((v) => l.answers!.outcomes[v.id] === 'yes').length; return (
+            <div className="open-sea-ov"><span><b className="big">{gone}</b> עננים התפזרו</span><span><b className="big sun-t">{lit}</b> מגדלורים דולקים</span></div>) })()}
+        </div>
         {tab === 'read' && <Read l={l} />}
         {tab === 'answer' && <AnswerForm l={l} onDone={done} />}
         {tab === 'compare' && l.answers && <Compare l={l} onDistill={distill} distilling={distilling} />}

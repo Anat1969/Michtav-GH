@@ -6,6 +6,9 @@ import { download, icsFor } from '../logic/ics'
 import { signInGoogle, useSession } from '../logic/auth'
 import type { Letter, SealedMeta } from '../logic/types'
 import { compare } from '../logic/score'
+import { Seascape } from '../components/Seascape'
+import { monthProgress } from './Home'
+import { go } from '../logic/route'
 
 type Card = { id: string; createdAt: string; openAt: string; storage: 'local' | 'cloud'; visions: number; fears: number; opened: boolean; letter?: Letter; sample?: boolean }
 
@@ -77,13 +80,21 @@ export function Letters() {
   return (
     <main className="page with-actions">
       <div className="wrap letters">
+        <div className="letters-sea">
+          <Seascape progress={waiting[0] ? Math.max(0, Math.min(1, (Date.now() - new Date(waiting[0].createdAt).getTime()) / (new Date(waiting[0].openAt).getTime() - new Date(waiting[0].createdAt).getTime()))) : monthProgress()}
+            bottles={[...waiting.map((c) => ({ id: c.id, progress: Math.max(0, Math.min(1, (Date.now() - new Date(c.createdAt).getTime()) / (new Date(c.openAt).getTime() - new Date(c.createdAt).getTime()))), label: fmt(c.openAt) })), ...ready.map((c) => ({ id: c.id, progress: 1, label: 'היום', due: true }))]}
+            onBottle={(id) => go(`/open/${id}`)} label={`${waiting.length} בקבוקים בים, ${ready.length} על החוף`} />
+          <div className="letters-sea-ov">
+            <span className="big">{waiting.length}</span><span>בקבוקים בים</span>
+            {ready.length > 0 && <><span className="big sun-t">{ready.length}</span><span>על החוף</span></>}
+          </div>
+        </div>
         <header className="letters-head">
           <p className="eyebrow">המכתבים שלי</p>
           <Rich insight={head.insight} detail={head.detail} className="big-rich" />
           {trend.length >= 2 && <Trend pts={trend} />}
           {cloudError && <p className="note" style={{ color: 'var(--wax)' }}>{cloudError}</p>}
           {loadingCloud && <p className="note">טוען מהשרת...</p>}
-          {!session && <p className="note">מכתבים בשרת מופיעים אחרי כניסה עם Google, מכפתור הלוגו.</p>}
         </header>
         <div className="lgrid">
           {cards.map(render)}

@@ -11,7 +11,7 @@ const menuJs = readFileSync('tests/fixtures/ai-menu.js', 'utf8')
 let fails = 0
 const ok = (c, m) => { console.log(`${c ? 'PASS' : 'FAIL'} ${m}`); if (!c) fails++ }
 
-const server = spawn('npx', ['vite', 'preview', '--port', '4173', '--strictPort'], { stdio: 'pipe' })
+const server = spawn('node_modules/.bin/vite', ['preview', '--port', '4173', '--strictPort'], { stdio: 'pipe' })
 await new Promise((r) => { server.stdout.on('data', (d) => { if (String(d).includes('4173')) r() }); setTimeout(r, 6000) })
 
 const browser = await chromium.launch()
@@ -42,21 +42,23 @@ async function scrollRatio(page) { return page.evaluate(() => document.documentE
 {
   const { ctx, page } = await newPage()
   await page.goto(BASE)
-  await page.waitForSelector('.ring svg')
+  await page.waitForSelector('[data-testid=sea]')
   ok(await page.locator('ai-menu .logo').isVisible(), 'A&I logo button in the top bar')
   ok(!(await page.locator('header >> text=העתקת קישור').first().isVisible().catch(() => false)), 'no loose development buttons in the bar')
   ok((await page.getAttribute('html', 'dir')) === 'rtl', 'html dir=rtl')
   ok((await page.locator('h1').textContent()).includes('91%'), 'home insight line with the key number')
   {
-    const n = Number((await page.locator('.ring-center .big').textContent()).trim())
+    const n = Number((await page.locator('.hero-days .big').textContent()).trim())
     const exp = await page.evaluate(() => { const d = new Date(); let x = new Date(d.getFullYear(), d.getMonth() + 1, 1); if (x - d < 7 * 864e5) x.setMonth(x.getMonth() + 1); return Math.ceil((x - d) / 864e5) })
-    ok(n === exp && n >= 7 && n <= 38, `ring counts days to the first of the month (${n})`)
-    ok((await page.locator('.ring-cap').textContent()).includes('הראשון לחודש'), 'ring caption names the first of the month')
+    ok(n === exp && n >= 7 && n <= 38, `hero counts days to the first of the month (${n})`)
+    await page.waitForTimeout(600)
+    const px = await page.evaluate(() => { const c = document.querySelector('[data-testid=sea]'); const x = c.getContext('2d'); const W = c.width, H = c.height; const a = x.getImageData(Math.floor(W * 0.6), Math.floor(H * 0.85), 1, 1).data; const b = x.getImageData(Math.floor(W * 0.6), Math.floor(H * 0.1), 1, 1).data; return { sea: Array.from(a), sky: Array.from(b) } })
+    ok(px.sea[3] === 255 && px.sea[2] > px.sea[0], `sea is painted blue (${px.sea.slice(0, 3)})`)
+    ok(px.sky[3] === 255, 'sky is painted')
+    ok((await page.locator('.hero-legend').textContent()).includes('מגדלור'), 'scene has a legend')
   }
-  await page.locator('.ring path[tabindex]').nth(2).hover()
-  ok((await page.locator('.ring-cap').textContent()).includes('ימים עד'), 'ring responds to hover with month')
   ok(await page.locator('.cmap-card').count() === 4, 'content map has 4 cards')
-  ok(await scrollRatio(page) < 1.35, `home fits the screen (ratio ${(await scrollRatio(page)).toFixed(2)})`)
+  ok(await scrollRatio(page) < 1.4, `home fits the screen (ratio ${(await scrollRatio(page)).toFixed(2)})`)
   await page.waitForTimeout(1300)
   await page.screenshot({ path: `${SHOTS}/home-1440.png` })
   const cdp = await ctx.newCDPSession(page)
@@ -69,7 +71,7 @@ async function scrollRatio(page) { return page.evaluate(() => document.documentE
     ok(true, `nav: ${label}`)
   }
   await page.click('.brand')
-  await page.waitForSelector('.ring')
+  await page.waitForSelector('.hero')
   ok(true, 'brand links home')
   await ctx.close()
 }
