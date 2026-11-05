@@ -1,23 +1,24 @@
-// תזכורת ליומן (RFC 5545) ליום הפתיחה, כדי שהמכתב לא יישכח.
+// תזכורת ליומן (RFC 5545): בראשון של כל חודש, לפתוח את המכתב ולכתוב את הבא. UID קבוע, כך שייבוא חוזר מעדכן את אותו אירוע.
 import { fmt } from './dates'
 
 const stamp = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '')
 const day = (d: Date) => `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`
 
-export function icsFor(id: string, openAt: string, url: string) {
+export function icsFor(_id: string, openAt: string, url: string) {
   const d = new Date(openAt)
   const next = new Date(d.getTime() + 86_400_000)
   return [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Michtav-GH//HE', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
     'BEGIN:VEVENT',
-    `UID:michtav-${id}@michtav-gh`,
+    'UID:michtav-monthly@michtav-gh',
     `DTSTAMP:${stamp(new Date())}`,
     `DTSTART;VALUE=DATE:${day(d)}`,
     `DTEND;VALUE=DATE:${day(next)}`,
-    'SUMMARY:המכתב לעצמי נפתח היום',
-    `DESCRIPTION:המכתב שחתמת לפני שנה נפתח ב-${fmt(openAt)}. ${url}`,
+    'RRULE:FREQ=MONTHLY;BYMONTHDAY=1',
+    'SUMMARY:הראשון לחודש: לפתוח את המכתב ולכתוב את הבא',
+    `DESCRIPTION:המכתב הבא נפתח ב-${fmt(openAt)}, ואחריו בכל ראשון לחודש. ${url}`,
     `URL:${url}`,
-    'BEGIN:VALARM', 'TRIGGER:PT9H', 'ACTION:DISPLAY', 'DESCRIPTION:המכתב לעצמי נפתח היום', 'END:VALARM',
+    'BEGIN:VALARM', 'TRIGGER:PT9H', 'ACTION:DISPLAY', 'DESCRIPTION:הראשון לחודש: מכתב לעצמי', 'END:VALARM',
     'END:VEVENT', 'END:VCALENDAR',
   ].join('\r\n')
 }

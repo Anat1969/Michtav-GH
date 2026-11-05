@@ -3,7 +3,7 @@ import { YearRing, type RingMark } from '../components/YearRing'
 import { Rich } from '../components/Rich'
 import { useLetters, getSample } from '../logic/store'
 import { compare } from '../logic/score'
-import { addYear, daysUntil, fmt, isDue } from '../logic/dates'
+import { nextFirst, daysUntil, fmt, isDue } from '../logic/dates'
 
 export function Home() {
   const reduce = useReducedMotion()
@@ -17,7 +17,7 @@ export function Home() {
   const next = waiting[0]
   const now = new Date()
   const start = next ? next.createdAt : now.toISOString()
-  const end = next ? next.openAt : addYear(now).toISOString()
+  const end = next ? next.openAt : nextFirst(now).toISOString()
   const marks: RingMark[] = next
     ? waiting.filter((l) => new Date(l.openAt) <= new Date(end)).map((l) => ({ id: l.id, at: l.openAt, label: `נפתח ב-${fmt(l.openAt)}`, kind: 'sealed' }))
     : [{ id: 'new', at: end, label: `מכתב שנכתב היום נפתח ב-${fmt(end)}`, kind: 'sample' }]
@@ -35,28 +35,28 @@ export function Home() {
     <main className="page">
       <div className="wrap home">
         <section className="home-text">
-          <p className="eyebrow">מכתב לעצמי בעוד שנה</p>
-          <h1 className="h1"><mark>91%</mark> מהדאגות לא מתממשות. בעוד שנה נבדוק את שלך.</h1>
-          <p className="lead">כותבים חזון ופחד, ולכל אחד נותנים הסתברות.<br />המכתב נחתם, ונפתח בעוד שנה עם שאלות השוואה וציון כיול.</p>
+          <p className="eyebrow">מכתב לעצמי לראשון בחודש</p>
+          <h1 className="h1"><mark>91%</mark> מהדאגות לא מתממשות. בראשון לחודש נבדוק את שלך.</h1>
+          <p className="lead">כותבים חזון ופחד, ולכל אחד נותנים הסתברות.<br />המכתב נחתם, ונפתח בראשון לחודש הבא עם שאלות השוואה וציון כיול.</p>
           <div className="home-cta">
             <a className="btn primary" href="#/write">לכתוב מכתב</a>
             <a className="btn" href="#/open/sample">יום פתיחה לדוגמה</a>
             {due > 0 && <a className="btn wax" href="#/letters">{due} מכתבים מחכים לפתיחה</a>}
           </div>
           <div className="psi">
-            <div className="psi-box problem"><span className="label">בעיה</span><Rich insight="**הזיכרון מתקן** את עצמו בדיעבד." detail="אחרי שנה כבר לא זוכרים כמה פחדנו, ולכן לא לומדים שהפחד **הגזים**." /></div>
-            <div className="psi-box solution"><span className="label">פתרון</span><Rich insight="**הסתברות** לכל חזון ולכל פחד." detail="המכתב נחתם עם המספרים, ונפתח בעוד **365** ימים עם **שאלות השוואה**." /></div>
+            <div className="psi-box problem"><span className="label">בעיה</span><Rich insight="**הזיכרון מתקן** את עצמו בדיעבד." detail="אחרי חודש כבר לא זוכרים כמה פחדנו, ולכן לא לומדים שהפחד **הגזים**." /></div>
+            <div className="psi-box solution"><span className="label">פתרון</span><Rich insight="**הסתברות** לכל חזון ולכל פחד." detail="המכתב נחתם עם המספרים, ונפתח **בראשון לחודש** עם **שאלות השוואה**." /></div>
             <div className="psi-box insight"><span className="label">תובנה</span><Rich insight="**ציון ברייר** מודד כמה צדקת." detail="**0** הוא כיול מושלם. ניחוש של **50%** על הכול מקבל **0.25**." /></div>
           </div>
         </section>
 
-        <section className="home-ring" aria-label="טבעת השנה">
-          <YearRing start={start} end={end} marks={marks} big={String(days)} caption={next ? `ימים עד שהמכתב הבא נפתח` : 'ימים עד שמכתב שנכתב היום נפתח'} />
+        <section className="home-ring" aria-label="טבעת החודש">
+          <YearRing start={start} end={end} marks={marks} big={String(days)} caption={next ? `ימים עד הראשון לחודש, ${fmt(next.openAt)}` : `ימים עד הראשון לחודש, ${fmt(end)}`} />
           <div className="legend ring-legend">
             <span><span className="dot lead" /> זמן שעבר</span>
             <span><span className="dot ink" style={{ width: 2, height: 12 }} /> היום</span>
             <span><span className="dot wax" /> חותם: יום פתיחה</span>
-            <span className="note">ריחוף על חודש: כמה ימים עד אליו</span>
+            <span className="note">ריחוף על יום: כמה ימים עד אליו</span>
           </div>
           <div data-aoa-demo="large" />
         </section>

@@ -39,7 +39,7 @@ function Read({ l }: { l: Letter }) {
   return (
     <article className="read lp cotton">
       <header className="lp-head"><span className="label">נכתב ב-{fmt(l.createdAt)}</span><span className="label">נפתח ב-{fmt(l.openAt)}</span></header>
-      <p className="lp-salute">לעצמי, בעוד שנה.</p>
+      <p className="lp-salute">לעצמי, בראשון לחודש.</p>
       <div className="read-cols">
         <section><h3 className="lp-h"><span className="dot sprout" /> מה יהיה נכון</h3><ul>{l.visions.map((v) => <li key={v.id} className="lp-row"><span className="lp-text">{v.text}</span><span className="num">{v.p}%</span></li>)}</ul></section>
         <section><h3 className="lp-h"><span className="dot wax" /> ממה חששתי</h3><ul>{l.fears.map((v) => <li key={v.id} className="lp-row"><span className="lp-text">{v.text}</span><span className="num">{v.p}%</span></li>)}</ul></section>
@@ -71,7 +71,7 @@ function AnswerForm({ l, onDone }: { l: Letter; onDone: (a: Answers) => void }) 
         </div>
       </section>
       <section className="card">
-        <h2 className="h3">איפה הסולם היום? <span className="note">לפני שנה: {l.ladder}</span></h2>
+        <h2 className="h3">איפה הסולם היום? <span className="note">בכתיבה: {l.ladder}</span></h2>
         <div className="row ladder-row">{Array.from({ length: 11 }, (_, n) => <button key={n} className="chip" aria-pressed={a.ladder === n} onClick={() => setA({ ...a, ladder: n })}><span className="num">{n}</span></button>)}</div>
         <div className="areas">
           {AREAS.map((ar) => (
@@ -109,7 +109,7 @@ function Compare({ l, onDistill, distilling }: { l: Letter; onDistill: () => voi
     { n: c.brier === null ? '–' : c.brier.toFixed(2), k: 'ציון ברייר', s: 'כיול: 0 מושלם, 0.25 מטבע' },
     { n: `${fearYes}/${fearCount}`, k: 'פחדים שהתממשו במלואם', s: `ממוצע עם חלקיים: ${Math.round(c.fearRealized)}%` },
     { n: `${Math.round(c.visionRealized)}%`, k: 'מהחזון התממש', s: `הערכת ${Math.round(c.visionPredicted)}%` },
-    { n: `${c.ladderAfter - c.ladderBefore >= 0 ? '+' : ''}${c.ladderAfter - c.ladderBefore}`, k: 'שינוי בסולם', s: `${c.ladderBefore} לפני שנה, ${c.ladderAfter} היום` },
+    { n: `${c.ladderAfter - c.ladderBefore >= 0 ? '+' : ''}${c.ladderAfter - c.ladderBefore}`, k: 'שינוי בסולם', s: `${c.ladderBefore} בכתיבה, ${c.ladderAfter} היום` },
   ]
   return (
     <div className="compare">
@@ -176,7 +176,7 @@ export function Open({ id }: { id: string }) {
       <div className="wrap open">
         <header className="open-head">
           <p className="eyebrow">{l.sample ? 'מכתב לדוגמה' : 'יום הפתיחה'} · נכתב ב-{fmt(l.createdAt)}</p>
-          <h1 className="h2">{tab === 'read' ? 'החותם נשבר. זה מה שכתבת לפני שנה.' : tab === 'answer' ? 'מה מזה קרה? סמנו כל משפט.' : 'כמה צדקת, ובמה הפחד הגזים.'}</h1>
+          <h1 className="h2">{tab === 'read' ? `החותם נשבר. זה מה שכתבת ב-${fmt(l.createdAt)}.` : tab === 'answer' ? 'מה מזה קרה? סמנו כל משפט.' : 'כמה צדקת, ובמה הפחד הגזים.'}</h1>
           <div className="row" role="tablist">
             {tabs.map((t, i) => <button key={t.k} role="tab" aria-selected={tab === t.k} className="chip" aria-pressed={tab === t.k} disabled={!t.on} onClick={() => setTab(t.k)}><span className="num">{i + 1}</span> {t.label}</button>)}
           </div>

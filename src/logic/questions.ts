@@ -13,9 +13,9 @@ export function localQuestions(visions: Item[], fears: Item[], note: string): st
   const topF = [...f].sort((a, b) => b.p - a.p)[0]
   if (topV) q.push(`כתבת "${clip(topV.text)}" ונתת לזה ${topV.p}%. מה קידם את זה, ומה עצר?`)
   if (lowV && lowV !== topV) q.push(`ל"${clip(lowV.text)}" נתת רק ${lowV.p}%. האם הזהירות עזרה או הגבילה?`)
-  if (topF) q.push(`פחדת ש"${clip(topF.text)}". מה הדאגה גבתה ממך בשנה הזו, גם אם זה לא קרה?`)
+  if (topF) q.push(`פחדת ש"${clip(topF.text)}". מה הדאגה גבתה ממך החודש, גם אם זה לא קרה?`)
   if (f.length > 1) q.push('איזה פחד נעלם בלי שהרגשת, ואיזה פחד חדש תפס את מקומו?')
   if (note.trim()) q.push('קראת את המילה ששלחת לעצמך. מה היית מוסיף או מוחק בה היום?')
-  q.push('מה היית רוצה להגיד לעצמך של לפני שנה, במשפט אחד?')
+  q.push('מה היית רוצה להגיד לעצמך של לפני חודש, במשפט אחד?')
   return q.slice(0, 5)
 }

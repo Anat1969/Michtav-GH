@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { LetterPaper, type Draft } from '../components/LetterPaper'
 import { Rich } from '../components/Rich'
 import { AREAS, type Item, type Letter } from '../logic/types'
-import { addYear, fmt, uid } from '../logic/dates'
+import { nextFirst, fmt, uid } from '../logic/dates'
 import { liveFearLine } from '../logic/score'
 import { localQuestions } from '../logic/questions'
 import { saveLetter, useLetters } from '../logic/store'
@@ -13,16 +13,16 @@ import { download, icsFor } from '../logic/ics'
 const DRAFT_KEY = 'michtav.draft.v1'
 const blank = (): Item => ({ id: uid(), text: '', p: 50 })
 function initial(): Draft {
-  try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (d?.visions) return d } catch { /* */ }
+  try { const d = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null'); if (d?.visions) return { ...d, createdAt: new Date().toISOString(), openAt: nextFirst(new Date()).toISOString() } } catch { /* */ }
   const now = new Date()
-  return { createdAt: now.toISOString(), openAt: addYear(now).toISOString(), visions: [blank(), blank(), blank()], fears: [blank(), blank(), blank()], ladder: 5, areas: { work: 5, relations: 5, health: 5, meaning: 5 }, note: '' }
+  return { createdAt: now.toISOString(), openAt: nextFirst(now).toISOString(), visions: [blank(), blank(), blank()], fears: [blank(), blank(), blank()], ladder: 5, areas: { work: 5, relations: 5, health: 5, meaning: 5 }, note: '' }
 }
 
 const STEPS = [
-  { short: 'חזון', q: 'מה יהיה נכון בחיים שלך בעוד שנה?', hint: 'כתבו כאילו זה כבר קרה, בגוף ראשון. ולכל משפט: כמה סביר שיתממש?' },
-  { short: 'פחד', q: 'ממה יש לך חשש לשנה הקרובה?', hint: 'הדאגה הכי אמיתית, לא הכי נכונה. ולכל אחת: כמה סביר שתתממש?' },
+  { short: 'חזון', q: 'מה יהיה נכון בחיים שלך בראשון לחודש הבא?', hint: 'כתבו כאילו זה כבר קרה, בגוף ראשון. ולכל משפט: כמה סביר שיתממש?' },
+  { short: 'פחד', q: 'ממה יש לך חשש לחודש הקרוב?', hint: 'הדאגה הכי אמיתית, לא הכי נכונה. ולכל אחת: כמה סביר שתתממש?' },
   { short: 'היום', q: 'איפה הסולם שלך עומד היום?', hint: 'דמיינו סולם: 10 הם החיים הטובים ביותר האפשריים עבורך, ו-0 הגרועים ביותר.' },
-  { short: 'חתימה', q: 'מה להגיד לעצמך בעוד שנה?', hint: 'משפט אחד או פסקה. המכתב ייפתח ב-' },
+  { short: 'חתימה', q: 'מה להגיד לעצמך בראשון לחודש?', hint: 'משפט אחד או פסקה. המכתב ייפתח ב-' },
 ]
 
 function ItemsEditor({ items, onChange, kind, placeholder }: { items: Item[]; onChange: (x: Item[]) => void; kind: 'sprout' | 'wax'; placeholder: string[] }) {
@@ -106,7 +106,7 @@ export function Write() {
               </div>
               <ol className="tl" aria-label="מה קורה עכשיו">
                 <li className="now"><span className="label">היום, {fmt(sealed.createdAt)}</span><b>המכתב חתום</b><span className="note">{sealed.visions.length} חזון, {sealed.fears.length} פחד, סולם {sealed.ladder}.</span></li>
-                <li><span className="label">במהלך השנה</span><b>שתיקה</b><span className="note">אין קריאה, אין עריכה. הזיכרון עובד לבד.</span></li>
+                <li><span className="label">במהלך החודש</span><b>שתיקה</b><span className="note">אין קריאה, אין עריכה. הזיכרון עובד לבד.</span></li>
                 <li className="end"><span className="label">{fmt(sealed.openAt)}</span><b>החותם נשבר</b><span className="note">מסמנים מה קרה, ומקבלים ציון ברייר.</span></li>
               </ol>
             </div>
@@ -189,7 +189,7 @@ export function Write() {
             <>
               {step < 3
                 ? <button className="btn primary" onClick={() => setStep(step + 1)}>הבא: {STEPS[step + 1].short}</button>
-                : <button className="btn wax" disabled={busy} onClick={seal}>{busy ? 'חותם...' : 'חתימה לשנה'}</button>}
+                : <button className="btn wax" disabled={busy} onClick={seal}>{busy ? 'חותם...' : 'חתימה עד הראשון לחודש'}</button>}
               <span className="grow">שלב <b className="num">{step + 1}</b> מתוך 4. הטיוטה נשמרת אוטומטית.</span>
               <button className="btn ghost" disabled={step === 0} onClick={() => setStep(step - 1)}>הקודם</button>
             </>

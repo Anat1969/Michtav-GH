@@ -1,5 +1,11 @@
 export const DAY = 86_400_000
-export function addYear(d: Date) { const x = new Date(d); x.setFullYear(x.getFullYear() + 1); return x }
+/** יום הפתיחה: הראשון לחודש הבא, בחצות. מכתב שנכתב פחות מ-7 ימים לפני כן נפתח בראשון שאחריו. */
+export const MIN_DAYS = 7
+export function nextFirst(d: Date) {
+  const x = new Date(d.getFullYear(), d.getMonth() + 1, 1)
+  if (x.getTime() - d.getTime() < MIN_DAYS * 86_400_000) x.setMonth(x.getMonth() + 1)
+  return x
+}
 export function daysUntil(iso: string, now = Date.now()) { return Math.max(0, Math.ceil((new Date(iso).getTime() - now) / DAY)) }
 export function isDue(iso: string, now = Date.now()) { return new Date(iso).getTime() <= now }
 export function fmt(iso: string) {

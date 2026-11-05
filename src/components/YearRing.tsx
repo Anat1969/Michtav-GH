@@ -17,7 +17,7 @@ function arc(a0: number, a1: number, r = R) {
   return `M${x0.toFixed(2)} ${y0.toFixed(2)} A${r} ${r} 0 ${large} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`
 }
 
-/** טבעת שנה: 365 ימים כמו טבעת בגזע עץ. החותם יושב בתאריך הפתיחה, והעופרת מראה כמה זמן כבר עבר. */
+/** טבעת זמן עד הפתיחה: יום אחרי יום, כמו טבעת בגזע עץ. החותם יושב בתאריך הפתיחה, והעופרת מראה כמה זמן כבר עבר. */
 export function YearRing({ start, end, now = Date.now(), marks = [], big, caption }: { start: string; end: string; now?: number; marks?: RingMark[]; big: string; caption: string }) {
   const reduce = useReducedMotion()
   const t0 = new Date(start).getTime()
@@ -26,15 +26,28 @@ export function YearRing({ start, end, now = Date.now(), marks = [], big, captio
   const ang = (t: number) => Math.max(0, Math.min(360, ((t - t0) / span) * 360))
   const [hover, setHover] = useState<number | null>(null)
 
+  // עד 70 יום: קטע לכל יום, ותווית בראשון לחודש ובכל שבוע. מעבר לזה: קטע לכל חודש.
   const months = useMemo(() => {
-    const out: { i: number; name: string; a0: number; a1: number; days: number }[] = []
+    const out: { i: number; name: string; a0: number; a1: number; days: number; label: boolean }[] = []
+    if (span <= 70 * DAY) {
+      const d = new Date(t0); d.setHours(0, 0, 0, 0)
+      for (let k = 0; k < 72; k++) {
+        const s = Math.max(d.getTime(), t0)
+        const nx = new Date(d); nx.setDate(nx.getDate() + 1)
+        const e = Math.min(nx.getTime(), t1)
+        if (e > s) out.push({ i: k, name: `${d.getDate()}.${d.getMonth() + 1}`, a0: ang(s), a1: ang(e), days: Math.ceil((s - now) / DAY), label: d.getDate() === 1 || k % 7 === 0 })
+        if (nx.getTime() >= t1) break
+        d.setDate(d.getDate() + 1)
+      }
+      return out
+    }
     const d = new Date(t0)
     d.setDate(1); d.setHours(0, 0, 0, 0)
     for (let k = 0; k < 14; k++) {
       const s = Math.max(d.getTime(), t0)
       const nx = new Date(d); nx.setMonth(nx.getMonth() + 1)
       const e = Math.min(nx.getTime(), t1)
-      if (e > s) out.push({ i: d.getMonth(), name: MONTHS[d.getMonth()], a0: ang(s), a1: ang(e), days: Math.round((s - now) / DAY) })
+      if (e > s) out.push({ i: d.getMonth(), name: MONTHS[d.getMonth()], a0: ang(s), a1: ang(e), days: Math.round((s - now) / DAY), label: ang(e) - ang(s) >= 12 })
       if (nx.getTime() >= t1) break
       d.setMonth(d.getMonth() + 1)
     }
@@ -45,14 +58,14 @@ export function YearRing({ start, end, now = Date.now(), marks = [], big, captio
   const hm = hover !== null ? months[hover] : null
 
   return (
-    <figure className="ring" aria-label={`טבעת שנה מ-${fmt(start)} עד ${fmt(end)}`}>
+    <figure className="ring" aria-label={`טבעת הזמן מ-${fmt(start)} עד ${fmt(end)}`}>
       <svg viewBox="0 0 400 400" style={{ direction: 'ltr' }} role="img">
-        <title>{`טבעת השנה: ${caption}`}</title>
+        <title>{`טבעת החודש: ${caption}`}</title>
         {/* טבעות פנימיות כמו בגזע: שכבות של זמן */}
         {[0.42, 0.56, 0.7].map((k) => <circle key={k} cx={C} cy={C} r={R * k} style={{ fill: 'none', stroke: 'var(--rule-soft)' }} strokeWidth={1} />)}
         <circle cx={C} cy={C} r={R} style={{ fill: 'none', stroke: 'var(--rule-soft)' }} strokeWidth={22} />
         {months.map((m, i) => (
-          <path key={i} d={arc(m.a0 + 0.6, m.a1 - 0.6)} strokeWidth={22}
+          <path key={i} d={arc(m.a0 + (m.a1 - m.a0 > 20 ? 0.6 : 0.8), m.a1 - (m.a1 - m.a0 > 20 ? 0.6 : 0.8))} strokeWidth={22}
             style={{ fill: 'none', stroke: hover === i ? 'var(--ink)' : 'var(--cotton)', cursor: 'pointer', transition: 'stroke .15s' }}
             onMouseEnter={() => setHover(i)} onMouseLeave={() => setHover(null)} onFocus={() => setHover(i)} onBlur={() => setHover(null)}
             tabIndex={0} aria-label={`${m.name}, ${m.days > 0 ? `בעוד ${m.days} ימים` : 'עבר'}`} />
@@ -62,7 +75,7 @@ export function YearRing({ start, end, now = Date.now(), marks = [], big, captio
             initial={reduce ? false : { pathLength: 0 }} animate={{ pathLength: 1 }} transition={{ duration: 1.2, ease: 'easeOut' }} />
         )}
         {months.map((m, i) => {
-          if (m.a1 - m.a0 < 12) return null
+          if (!m.label) return null
           const [x, y] = pt((m.a0 + m.a1) / 2, R + 30)
           return <text key={`l${i}`} x={x} y={y + 4} textAnchor="middle" style={{ fill: hover === i ? 'var(--ink)' : 'var(--ink-3)', fontSize: 11.5, fontFamily: 'var(--sans)', direction: 'rtl' }}>{m.name}</text>
         })}
@@ -84,7 +97,7 @@ export function YearRing({ start, end, now = Date.now(), marks = [], big, captio
         {hm ? (
           <>
             <span className="big">{hm.days > 0 ? hm.days : 0}</span>
-            <span className="ring-cap">ימים עד <b>{hm.name}</b></span>
+            <span className="ring-cap">ימים עד <b className="num">{hm.name}</b></span>
           </>
         ) : (
           <>

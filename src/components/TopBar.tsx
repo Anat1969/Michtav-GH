@@ -45,11 +45,11 @@ export function TopBar({ route }: { route: Route }) {
   return (
     <header className="topbar" role="banner">
       <div className="topbar-inner">
-        <a href="#/" className="brand" aria-label="מכתב לעצמי בעוד שנה, דף הבית">
+        <a href="#/" className="brand" aria-label="מכתב לעצמי, דף הבית">
           <img src="./icon.svg" alt="" />
           <span>
             <span className="brand-name">מכתב לעצמי</span>
-            <span className="brand-sub"> בעוד שנה</span>
+            <span className="brand-sub"> לראשון בחודש</span>
           </span>
         </a>
         <nav className="nav" aria-label="ניווט ראשי">

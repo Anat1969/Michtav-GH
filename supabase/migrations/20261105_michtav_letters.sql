@@ -1,4 +1,4 @@
--- מכתב לעצמי בעוד שנה: החותם בשרת.
+-- מכתב לעצמי לראשון בחודש: החותם בשרת.
 -- הבעלים יכול/ה להכניס מכתב, ולקרוא או לעדכן אותו רק מיום הפתיחה. לפני כן מגיעים רק מטא־נתונים דרך michtav_sealed().
 create table if not exists public.michtav_letters (
   id uuid primary key,
@@ -7,7 +7,7 @@ create table if not exists public.michtav_letters (
   open_at timestamptz not null,
   letter jsonb not null,
   answers jsonb,
-  constraint michtav_open_after_created check (open_at >= created_at + interval '30 days'),
+  constraint michtav_open_after_created check (open_at >= created_at + interval '6 days'),
   constraint michtav_letter_size check (pg_column_size(letter) < 32768)
 );
 create index if not exists michtav_letters_owner_idx on public.michtav_letters(owner, open_at);

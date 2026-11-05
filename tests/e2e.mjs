@@ -47,7 +47,12 @@ async function scrollRatio(page) { return page.evaluate(() => document.documentE
   ok(!(await page.locator('header >> text=העתקת קישור').first().isVisible().catch(() => false)), 'no loose development buttons in the bar')
   ok((await page.getAttribute('html', 'dir')) === 'rtl', 'html dir=rtl')
   ok((await page.locator('h1').textContent()).includes('91%'), 'home insight line with the key number')
-  ok((await page.locator('.ring-center .big').textContent()).trim() === '365' || (await page.locator('.ring-center .big').textContent()).trim() === '366', 'ring shows days until opening')
+  {
+    const n = Number((await page.locator('.ring-center .big').textContent()).trim())
+    const exp = await page.evaluate(() => { const d = new Date(); let x = new Date(d.getFullYear(), d.getMonth() + 1, 1); if (x - d < 7 * 864e5) x.setMonth(x.getMonth() + 1); return Math.ceil((x - d) / 864e5) })
+    ok(n === exp && n >= 7 && n <= 38, `ring counts days to the first of the month (${n})`)
+    ok((await page.locator('.ring-cap').textContent()).includes('הראשון לחודש'), 'ring caption names the first of the month')
+  }
   await page.locator('.ring path[tabindex]').nth(2).hover()
   ok((await page.locator('.ring-cap').textContent()).includes('ימים עד'), 'ring responds to hover with month')
   ok(await page.locator('.cmap-card').count() === 4, 'content map has 4 cards')
@@ -94,7 +99,7 @@ async function scrollRatio(page) { return page.evaluate(() => document.documentE
   ok((await page.locator('.qprev li').count()) >= 3, 'local comparison questions preview')
   await page.check('.consent input')
   await page.screenshot({ path: `${SHOTS}/sign-1440.png` })
-  await page.click('.actions >> text=חתימה לשנה')
+  await page.click('.actions >> text=חתימה עד הראשון לחודש')
   await page.waitForSelector('.sealed-done')
   ok(aiCalls.some((c) => c.mode === 'questions' && c.visions?.length === 2), 'AI questions request sent only after consent, with the letter')
   await page.waitForTimeout(1600)
@@ -103,6 +108,14 @@ async function scrollRatio(page) { return page.evaluate(() => document.documentE
   ok(stored.length === 1 && stored[0].qSource === 'ai' && stored[0].questions[0].includes('AI'), 'letter saved with AI questions')
   const [dl] = await Promise.all([page.waitForEvent('download'), page.click('.actions >> text=תזכורת ליומן')])
   ok(dl.suggestedFilename().endsWith('.ics'), 'calendar reminder downloads')
+  {
+    const ics = readFileSync(await dl.path(), 'utf8')
+    ok(ics.includes('RRULE:FREQ=MONTHLY;BYMONTHDAY=1'), 'reminder repeats on the 1st of every month')
+  }
+  {
+    const s = stored[0], o = new Date(s.openAt)
+    ok(o.getDate() === 1 && o.getHours() === 0 && (o - new Date(s.createdAt)) >= 7 * 864e5, `letter opens on the 1st of a month (${o.toDateString()})`)
+  }
   // אחרי רענון: נשמר, וחתום
   await page.goto(BASE + '#/letters')
   await page.reload()
@@ -125,7 +138,7 @@ async function scrollRatio(page) { return page.evaluate(() => document.documentE
   await page.goto(BASE + '#/write')
   await page.locator('.items .field').nth(0).fill('משהו')
   for (let i = 0; i < 3; i++) await page.click('.actions >> text=הבא')
-  await page.click('.actions >> text=חתימה לשנה')
+  await page.click('.actions >> text=חתימה עד הראשון לחודש')
   await page.waitForSelector('.sealed-done')
   ok(aiCalls.length === before, 'no AI call without consent')
   await ctx.close()
@@ -137,7 +150,7 @@ async function scrollRatio(page) { return page.evaluate(() => document.documentE
   await page.goto(BASE)
   await page.evaluate(() => {
     const now = Date.now(), D = 86400000
-    localStorage.setItem('michtav.letters.v1', JSON.stringify([{ id: 'due1', createdAt: new Date(now - 366 * D).toISOString(), openAt: new Date(now - D).toISOString(), storage: 'local', visions: [{ id: 'a', text: 'חזון א', p: 90 }], fears: [{ id: 'b', text: 'פחד ב', p: 80 }, { id: 'c', text: 'פחד ג', p: 60 }], ladder: 4, areas: { work: 4, relations: 5, health: 5, meaning: 4 }, note: 'שלום', questions: ['ש1?', 'ש2?'], qSource: 'local' }]))
+    localStorage.setItem('michtav.letters.v1', JSON.stringify([{ id: 'old1', createdAt: new Date(now - 62 * D).toISOString(), openAt: new Date(now - 31 * D).toISOString(), storage: 'local', visions: [{ id: 'x', text: 'ישן', p: 90 }], fears: [{ id: 'y', text: 'ישן פחד', p: 90 }], ladder: 5, areas: { work: 5, relations: 5, health: 5, meaning: 5 }, note: '', questions: ['ש?'], qSource: 'local', answers: { outcomes: { x: 'no', y: 'no' }, ladder: 5, areas: { work: 5, relations: 5, health: 5, meaning: 5 }, replies: [''], openedAt: new Date(now - 31 * D).toISOString() } }, { id: 'due1', createdAt: new Date(now - 366 * D).toISOString(), openAt: new Date(now - D).toISOString(), storage: 'local', visions: [{ id: 'a', text: 'חזון א', p: 90 }], fears: [{ id: 'b', text: 'פחד ב', p: 80 }, { id: 'c', text: 'פחד ג', p: 60 }], ladder: 4, areas: { work: 4, relations: 5, health: 5, meaning: 4 }, note: 'שלום', questions: ['ש1?', 'ש2?'], qSource: 'local' }]))
   })
   await page.goto(BASE + '#/open/due1')
   await page.reload()
@@ -158,12 +171,16 @@ async function scrollRatio(page) { return page.evaluate(() => document.documentE
   ok((await page.locator('.kpi .big').first().textContent()) === '0.22', 'Brier score computed correctly (0.22)')
   ok((await page.locator('.kpi .big').nth(3).textContent()) === '+3', 'ladder delta +3')
   ok((await page.locator('.cmp-side').textContent()).includes('הפחד הגזים'), 'computed fear insight under chart')
-  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('michtav.letters.v1'))[0].answers)
+  const saved = await page.evaluate(() => JSON.parse(localStorage.getItem('michtav.letters.v1')).find((l) => l.id === 'due1').answers)
   ok(saved && saved.outcomes.b === 'no' && saved.replies[0] === 'תשובה ראשונה', 'answers saved with the letter')
   page.once('dialog', (d) => d.accept())
   await page.click('text=זיקוק ב-AI')
   await page.waitForSelector('.insight-box')
   ok(aiCalls.some((c) => c.mode === 'distill' && c.payload?.brier > 0.2), 'distill request sends computed scores')
+  await page.goto(BASE + '#/letters')
+  await page.waitForSelector('[data-testid=trend]')
+  ok((await page.locator('[data-testid=trend]').textContent()).includes('הכיול השתפר'), 'monthly calibration trend: 0.81 to 0.22 reads as improved')
+  await page.screenshot({ path: `${SHOTS}/letters-trend-1440.png` })
   await ctx.close()
 }
 

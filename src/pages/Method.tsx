@@ -20,11 +20,11 @@ export function Method() {
             <cite>סרן קירקגור (Søren Kierkegaard), יומנים, 1843</cite>
           </blockquote>
           <div className="psi">
-            <div className="psi-box problem"><span className="label">מה הכלי מודד</span><Rich insight="**כיול**, לא הצלחה." detail="ציון נמוך לא אומר שהשנה הייתה רעה. הוא אומר שההסתברויות שנתת **רחוקות** ממה שקרה." /></div>
+            <div className="psi-box problem"><span className="label">מה הכלי מודד</span><Rich insight="**כיול**, לא הצלחה." detail="ציון נמוך לא אומר שהחודש היה רע. הוא אומר שההסתברויות שנתת **רחוקות** ממה שקרה." /></div>
             <div className="psi-box solution"><span className="label">איך הוא מודד את עצמו</span><Rich insight="**ברייר** מול הטלת מטבע." detail="**0** מושלם, **0.25** הוא 50% על הכול. ציון מעל 0.25 אומר שניחוש עיוור היה טוב יותר." /></div>
-            <div className="psi-box insight"><span className="label">מגבלות</span><Rich insight="**שישה משפטים** הם מדגם קטן." detail="הציון רועש במכתב אחד. אחרי **שלושה** מכתבים מתחילים לראות דפוס. הכלי לא מאבחן." /></div>
+            <div className="psi-box insight"><span className="label">מגבלות</span><Rich insight="**שישה משפטים** הם מדגם קטן." detail="הציון רועש במכתב אחד. אחרי **שלושה** חודשים מתחילים לראות דפוס. הכלי לא מאבחן." /></div>
           </div>
-          <p className="haiku">חותם של שעווה<br />שנה שלמה שותקת<br />הדיו עוד זוכר</p>
+          <p className="haiku">חותם של שעווה<br />חודש שלם שותק<br />בראשון נפתח</p>
         </section>
         <section className="method-table" aria-label="המקורות">
           <table>

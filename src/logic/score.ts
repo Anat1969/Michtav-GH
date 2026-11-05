@@ -86,7 +86,7 @@ export function fearInsight(c: Comparison) {
 
 export function visionInsight(c: Comparison) {
   const gap = r0(c.visionBias)
-  if (gap > 10) return { insight: `**החזון רץ מהר** מהשנה.`, detail: `קיווית ל-**${r0(c.visionPredicted)}%**, והתממשו **${r0(c.visionRealized)}%**. פער של **${gap}** נקודות.` }
+  if (gap > 10) return { insight: `**החזון רץ מהר** מהחודש.`, detail: `קיווית ל-**${r0(c.visionPredicted)}%**, והתממשו **${r0(c.visionRealized)}%**. פער של **${gap}** נקודות.` }
   if (gap < -10) return { insight: `**הגשמת יותר** ממה שהערכת.`, detail: `נתת לחזון **${r0(c.visionPredicted)}%**, והתממשו **${r0(c.visionRealized)}%**. הצניעות עלתה **${-gap}** נקודות.` }
   return { insight: `**החזון כויל היטב**.`, detail: `הערכת **${r0(c.visionPredicted)}%**, והתממשו **${r0(c.visionRealized)}%**.` }
 }

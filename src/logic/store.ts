@@ -101,7 +101,7 @@ export function importLetters(json: string) {
   return xs.length
 }
 
-// מכתב לדוגמה: נחתם לפני שנה ונפתח היום. התשובות שלו נשמרות רק בזיכרון.
+// מכתב לדוגמה: נחתם בראשון לחודש הקודם ונפתח בראשון לחודש הזה. התשובות שלו נשמרות רק בזיכרון.
 let sampleState: Letter = sampleLetter()
 export const getSample = () => sampleState
 export function resetSample() { sampleState = sampleLetter(); emit() }

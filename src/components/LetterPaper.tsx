@@ -31,7 +31,7 @@ export function LetterPaper({ d, step, sealed = false }: { d: Draft; step: numbe
           <span className="label">נכתב ב-{fmt(d.createdAt)}</span>
           <span className="label">נפתח ב-<b className="num">{fmt(d.openAt)}</b></span>
         </header>
-        <p className="lp-salute">לעצמי, בעוד שנה.</p>
+        <p className="lp-salute">לעצמי, בראשון לחודש.</p>
         <section className={`lp-sec ${step === 0 ? 'on' : ''}`}>
           <h3 className="lp-h"><span className="dot sprout" /> מה יהיה נכון</h3>
           {v.length ? <ul>{v.map((x) => <Row key={x.id} item={x} kind="sprout" />)}</ul> : <p className="lp-empty">עוד לא נכתב.</p>}

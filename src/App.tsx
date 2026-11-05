@@ -9,7 +9,7 @@ import { Letters } from './pages/Letters'
 import { Open } from './pages/Open'
 import { Method } from './pages/Method'
 
-const TITLES: Record<string, string> = { home: 'מכתב לעצמי בעוד שנה', write: 'כתיבה', letters: 'המכתבים שלי', open: 'יום הפתיחה', method: 'השיטה' }
+const TITLES: Record<string, string> = { home: 'מכתב לעצמי לראשון בחודש', write: 'כתיבה', letters: 'המכתבים שלי', open: 'יום הפתיחה', method: 'השיטה' }
 
 export function App() {
   const route = useRoute()
